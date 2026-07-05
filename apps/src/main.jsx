@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { useStoredState } from "./hooks/useStoredState.js";
 import { useTripWeather } from "./hooks/useTripWeather.js";
+import { defaultDestinationPack } from "./lib/destinationRegistry.js";
 import {
   BusFront,
   CalendarDays,
@@ -2115,7 +2116,7 @@ function buildRouteAwarePlan(
 }
 
 function App() {
-  const destination = baselDestinationPack;
+  const destination = defaultDestinationPack;
   const destinationCopy = destination.hero;
   const destinationFood = destination.foodStrategy;
   const storageKey = (name) => `navo-${destination.id}-${name}`;
