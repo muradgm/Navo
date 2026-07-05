@@ -1,0 +1,26 @@
+{
+  "id": "string",
+  "destinationId": "string",
+  "title": { "en": "string", "de": "string" },
+  "summary": { "en": "string", "de": "string" },
+  "type": "string",
+  "costLevel": "free|low|medium|high",
+  "estimatedCostEUR": [0, 0],
+  "durationMinutes": [0, 0],
+  "kidFit": "poor|okay|good|excellent",
+  "businessFit": "poor|okay|good|excellent",
+  "weatherFit": ["sunny", "rainy", "hot", "cold", "any"],
+  "energyLevel": "low|medium|high",
+  "links": {
+    "official": "string",
+    "googleMaps": "string",
+    "photos": "string"
+  },
+  "images": [
+    {
+      "src": "string",
+      "alt": { "en": "string", "de": "string" },
+      "kind": "ai-generated|official|user-uploaded"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "taskId": "string",
+  "owner": "PM|UX|FS|DATA|AI|QA|DEVOPS|GTM",
+  "summary": "string",
+  "filesChanged": ["string"],
+  "validation": ["string"],
+  "risks": ["string"],
+  "confidence": "low|medium|high"
+}
