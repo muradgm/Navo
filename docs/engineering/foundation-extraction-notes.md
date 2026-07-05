@@ -32,7 +32,7 @@ This branch starts the extraction from a single large Basel prototype into a reu
 
 ## Not done yet
 
-`apps/src/main.jsx` is not wired to these modules in this branch. That should be the next commit after reviewing the scaffolding, because the current file is large and behavior-heavy.
+`apps/src/main.jsx` is partially wired to the new hooks and destination registry, but it still retains the full local Basel pack data. The registry scaffolding exists, however the external Basel destination pack is not yet complete enough to replace the local pack safely.
 
 ## Next safe commit
 
