@@ -7,11 +7,17 @@ This branch starts the extraction from a single large Basel prototype into a reu
 - `apps/src/services/weatherService.js`
   - Open-Meteo forecast fetching
   - weather code labeling
-  - weather classification into app-level states
+  - current app-compatible weather mood classification
+  - preserves the current returned day shape
+
+- `apps/src/hooks/useTripWeather.js`
+  - reusable weather hook
+  - preserves the current loading and error state shape from `main.jsx`
+  - delegates API fetch and parsing to `weatherService.js`
 
 - `apps/src/hooks/useStoredState.js`
   - reusable localStorage-backed state hook
-  - safe read/write handling
+  - safe read and write handling
 
 - `apps/src/data/destinations/basel/index.js`
   - Basel destination metadata scaffold
@@ -32,8 +38,8 @@ This branch starts the extraction from a single large Basel prototype into a reu
 
 1. Import `useStoredState` from `hooks/useStoredState.js`.
 2. Delete the local `useStoredState` implementation from `main.jsx`.
-3. Import weather helpers from `services/weatherService.js`.
-4. Keep the current `useTripWeather` hook behavior unchanged while delegating fetch/parsing to the service.
+3. Import `useTripWeather` from `hooks/useTripWeather.js`.
+4. Delete the local weather helper and hook implementation from `main.jsx`.
 5. Import Basel base metadata from `data/destinations/basel/index.js`.
 6. Replace only the matching constants in `main.jsx`.
 
