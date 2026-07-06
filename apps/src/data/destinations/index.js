@@ -1,7 +1,9 @@
 import { baselDestinationPack } from "./basel/index.js";
+import { barcelonaDestinationPack } from "./barcelona/index.js";
 
 export const destinationPacks = {
   basel: baselDestinationPack,
+  barcelona: barcelonaDestinationPack,
 };
 
 export const destinationIds = Object.keys(destinationPacks);
