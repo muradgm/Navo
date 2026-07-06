@@ -177,22 +177,18 @@ function TodayDecisionWidget() {
 }
 
 function ensureMountNode() {
-  const todaySection = document.querySelector("main > section.section");
+  const weatherPanel = document.querySelector("main > section.section .weather-panel");
+  if (!weatherPanel) return null;
+
+  const todaySection = weatherPanel.closest("section.section");
   if (!todaySection) return null;
 
   const alreadyMounted = todaySection.querySelector("#today-decision-widget-root");
   if (alreadyMounted) return alreadyMounted;
 
-  const weatherPanel = todaySection.querySelector(".weather-panel");
   const mount = document.createElement("div");
   mount.id = "today-decision-widget-root";
-
-  if (weatherPanel?.parentNode) {
-    weatherPanel.insertAdjacentElement("afterend", mount);
-  } else {
-    todaySection.prepend(mount);
-  }
-
+  weatherPanel.insertAdjacentElement("afterend", mount);
   return mount;
 }
 
