@@ -1,0 +1,304 @@
+/* Destination Page Layout V2 foundation
+   Non-invasive layout and accessibility polish while main.jsx is still a monolith. */
+
+:root {
+  --layout-max: 1220px;
+  --layout-gap: clamp(16px, 3vw, 28px);
+  --layout-radius-xl: 30px;
+  --layout-focus: 0 0 0 4px rgba(0, 194, 168, 0.28);
+  --layout-surface: rgba(255, 255, 255, 0.94);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+}
+
+main {
+  width: min(100%, var(--layout-max));
+}
+
+button:focus-visible,
+a:focus-visible,
+select:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+.dayflow-stop-marker:focus-visible {
+  outline: none;
+  box-shadow: var(--layout-focus);
+}
+
+.hero {
+  min-height: clamp(470px, 58vw, 680px);
+  display: grid;
+  align-content: space-between;
+  padding: clamp(22px, 4vw, 42px);
+  isolation: isolate;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(90deg, rgba(11, 18, 32, 0.82), rgba(11, 18, 32, 0.42) 54%, rgba(11, 18, 32, 0.66)),
+    radial-gradient(circle at 14% 12%, var(--destination-accent-soft, rgba(0, 194, 168, 0.2)), transparent 36%);
+  pointer-events: none;
+}
+
+.hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.hero h1 {
+  max-width: 920px;
+  margin-top: clamp(44px, 9vw, 104px);
+  font-size: clamp(3.4rem, 11vw, 8rem);
+  letter-spacing: -0.065em;
+}
+
+.hero > p:not(.tagline) {
+  max-width: 780px;
+  font-size: clamp(1rem, 1.9vw, 1.2rem);
+}
+
+.hero-grid,
+.capability-strip,
+.transport-strip {
+  gap: 10px;
+}
+
+.metric,
+.capability,
+.transport-mode {
+  min-height: 58px;
+  backdrop-filter: blur(14px);
+}
+
+.tabs {
+  top: 0;
+  margin-inline: -14px;
+  padding-inline: 14px;
+  border-bottom: 1px solid rgba(19, 50, 74, 0.06);
+}
+
+.tabs button {
+  min-height: 44px;
+}
+
+.section {
+  scroll-margin-top: 82px;
+  margin-top: var(--layout-gap);
+  border-radius: var(--layout-radius-xl);
+}
+
+.section > .header {
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(19, 50, 74, 0.08);
+}
+
+.section > .header h2 {
+  font-size: clamp(1.45rem, 3vw, 2rem);
+}
+
+.weather-panel,
+.smart-panel,
+.preference-panel,
+.route-aware-panel,
+.dayflow-map-card,
+.today-decision-card {
+  border-radius: 26px;
+}
+
+#today-decision-widget-root {
+  margin: clamp(16px, 2.5vw, 24px) 0;
+}
+
+.today-decision-card {
+  border-color: rgba(0, 194, 168, 0.22);
+}
+
+.control-grid {
+  margin-top: 14px;
+}
+
+.control,
+.info-card,
+.grocery-card,
+.budget-card,
+.activity-card,
+.recommendation-card,
+.smart-stop,
+.dayflow-route-list li {
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.activity-card:hover,
+.info-card:hover,
+.grocery-card:hover,
+.recommendation-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 194, 168, 0.26);
+  box-shadow: 0 18px 44px rgba(11, 18, 32, 0.1);
+}
+
+.card-grid {
+  gap: clamp(14px, 2vw, 20px);
+}
+
+.image-button img,
+.image-fallback {
+  min-height: 220px;
+}
+
+.card-actions button,
+.add-target-panel button,
+.apply-recommendation,
+.decision-apply,
+.route-map-link {
+  min-height: 44px;
+}
+
+.dayflow-map-card {
+  margin-top: clamp(18px, 3vw, 28px);
+}
+
+.dayflow-map-shell {
+  min-height: clamp(360px, 54vw, 610px);
+}
+
+.dayflow-route-line {
+  filter: drop-shadow(0 10px 18px rgba(11, 18, 32, 0.22));
+}
+
+.dayflow-stop-marker {
+  min-height: 44px;
+}
+
+.dayflow-stop-marker:focus-visible,
+.dayflow-stop-marker:hover {
+  z-index: 10;
+}
+
+.dayflow-stop-marker b,
+.dayflow-route-list b {
+  background: linear-gradient(135deg, var(--destination-accent, #00c2a8), var(--destination-dark, #0b1220));
+}
+
+.dayflow-route-list {
+  margin-top: 14px;
+}
+
+.dayflow-route-list li {
+  min-height: 56px;
+}
+
+.food-grid,
+.safety-grid,
+.grocery-grid,
+.budget-grid {
+  gap: clamp(10px, 1.6vw, 16px);
+}
+
+.toast {
+  min-height: 52px;
+}
+
+@media (min-width: 900px) {
+  main {
+    padding-top: 30px;
+  }
+
+  .hero-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .section {
+    padding: clamp(22px, 3vw, 30px);
+  }
+
+  .weather-panel + #today-decision-widget-root,
+  #today-decision-widget-root + .route-aware-panel {
+    margin-top: 22px;
+  }
+
+  .dayflow-map-card:not(.dense) {
+    padding: 18px;
+  }
+}
+
+@media (min-width: 1180px) {
+  .card-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .dayflow-map-shell {
+    aspect-ratio: 17 / 9;
+  }
+}
+
+@media (max-width: 719px) {
+  main {
+    padding-inline: 12px;
+  }
+
+  .hero {
+    min-height: 520px;
+    border-radius: 24px;
+  }
+
+  .hero h1 {
+    margin-top: 54px;
+  }
+
+  .hero-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tabs {
+    margin-inline: -12px;
+    padding-inline: 12px;
+  }
+
+  .section {
+    border-radius: 24px;
+    padding: 15px;
+  }
+
+  .section > .header {
+    align-items: flex-start;
+  }
+
+  .dayflow-map-shell {
+    min-height: 420px;
+  }
+
+  .dayflow-bottom-sheet {
+    max-height: 44%;
+    overflow: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
+}
