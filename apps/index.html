@@ -11,48 +11,10 @@
     <title>Navo</title>
   </head>
   <body>
-    <div
-      id="destination-switcher"
-      style="position: fixed; right: 16px; bottom: 16px; z-index: 50; display: flex; gap: 8px; align-items: center; padding: 10px 12px; border: 1px solid rgba(255,255,255,0.2); border-radius: 999px; background: rgba(4,13,29,0.86); color: white; font: 600 12px Poppins, sans-serif; box-shadow: 0 14px 40px rgba(0,0,0,0.28); backdrop-filter: blur(12px);"
-    >
-      <label for="destination-select">Destination</label>
-      <select
-        id="destination-select"
-        style="border: 1px solid rgba(255,255,255,0.24); border-radius: 999px; background: rgba(255,255,255,0.1); color: white; padding: 6px 10px; font: 600 12px Poppins, sans-serif;"
-      >
-        <option value="basel">Basel</option>
-        <option value="barcelona">Barcelona</option>
-      </select>
-    </div>
+    <div id="destination-switcher-root"></div>
     <div id="root"></div>
-    <script>
-      (() => {
-        const storageKey = "navo-active-destination-id";
-        const availableDestinations = ["basel", "barcelona"];
-        const selector = document.getElementById("destination-select");
-        const params = new URLSearchParams(window.location.search);
-        const requestedDestination =
-          params.get("destination") ||
-          window.localStorage.getItem(storageKey) ||
-          "basel";
-        const activeDestination = availableDestinations.includes(
-          requestedDestination,
-        )
-          ? requestedDestination
-          : "basel";
-
-        selector.value = activeDestination;
-        window.localStorage.setItem(storageKey, activeDestination);
-
-        selector.addEventListener("change", (event) => {
-          const nextDestination = event.target.value;
-          window.localStorage.setItem(storageKey, nextDestination);
-          params.set("destination", nextDestination);
-          window.location.search = params.toString();
-        });
-      })();
-    </script>
     <script src="/activity-image-fallback.js"></script>
+    <script type="module" src="/src/destination-switcher.jsx"></script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
