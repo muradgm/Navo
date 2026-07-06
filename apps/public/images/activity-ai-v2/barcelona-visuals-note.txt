@@ -1,0 +1,1 @@
+Barcelona generated visuals are handled by activity-image-fallback.js.
