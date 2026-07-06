@@ -1,13 +1,27 @@
 import { baselDestinationPack } from "./basel/index.js";
 import { barcelonaDestinationPack } from "./barcelona/index.js";
+import {
+  destinationVisuals,
+  fallbackDestinationVisuals,
+} from "./visuals.js";
 
 const FALLBACK_DESTINATION_ID = "basel";
 const DESTINATION_STORAGE_KEY = "navo-active-destination-id";
 
-export const destinationPacks = {
+const baseDestinationPacks = {
   basel: baselDestinationPack,
   barcelona: barcelonaDestinationPack,
 };
+
+export const destinationPacks = Object.fromEntries(
+  Object.entries(baseDestinationPacks).map(([id, pack]) => [
+    id,
+    {
+      ...pack,
+      ...(destinationVisuals[id] || fallbackDestinationVisuals),
+    },
+  ]),
+);
 
 export const destinationIds = Object.keys(destinationPacks);
 export const destinationRegistry = destinationPacks;
