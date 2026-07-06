@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Navo route-aware city-day planner with Basel loaded as the first proof destination pack." />
+    <meta name="description" content="Navo route-aware city-day planner with registry-backed destination packs." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -11,7 +11,47 @@
     <title>Navo</title>
   </head>
   <body>
+    <div
+      id="destination-switcher"
+      style="position: fixed; right: 16px; bottom: 16px; z-index: 50; display: flex; gap: 8px; align-items: center; padding: 10px 12px; border: 1px solid rgba(255,255,255,0.2); border-radius: 999px; background: rgba(4,13,29,0.86); color: white; font: 600 12px Poppins, sans-serif; box-shadow: 0 14px 40px rgba(0,0,0,0.28); backdrop-filter: blur(12px);"
+    >
+      <label for="destination-select">Destination</label>
+      <select
+        id="destination-select"
+        style="border: 1px solid rgba(255,255,255,0.24); border-radius: 999px; background: rgba(255,255,255,0.1); color: white; padding: 6px 10px; font: 600 12px Poppins, sans-serif;"
+      >
+        <option value="basel">Basel</option>
+        <option value="barcelona">Barcelona</option>
+      </select>
+    </div>
     <div id="root"></div>
+    <script>
+      (() => {
+        const storageKey = "navo-active-destination-id";
+        const availableDestinations = ["basel", "barcelona"];
+        const selector = document.getElementById("destination-select");
+        const params = new URLSearchParams(window.location.search);
+        const requestedDestination =
+          params.get("destination") ||
+          window.localStorage.getItem(storageKey) ||
+          "basel";
+        const activeDestination = availableDestinations.includes(
+          requestedDestination,
+        )
+          ? requestedDestination
+          : "basel";
+
+        selector.value = activeDestination;
+        window.localStorage.setItem(storageKey, activeDestination);
+
+        selector.addEventListener("change", (event) => {
+          const nextDestination = event.target.value;
+          window.localStorage.setItem(storageKey, nextDestination);
+          params.set("destination", nextDestination);
+          window.location.search = params.toString();
+        });
+      })();
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
