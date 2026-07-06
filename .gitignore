@@ -1,9 +1,12 @@
 # Dependencies
 node_modules/
+apps/node_modules/
 
 # Build output
 dist/
+apps/dist/
 .vite/
+apps/node_modules/.vite/
 
 # Environment files
 .env
