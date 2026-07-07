@@ -1,0 +1,53 @@
+/* Active DayFlow stop interactions */
+
+body .dayflow-stop-marker.is-active {
+  z-index: 12;
+  transform: translate(calc(-50% + var(--pin-dx, 0px)), calc(-50% + var(--pin-dy, 0px))) scale(1.1);
+  border-color: var(--destination-accent, #00c2a8);
+  box-shadow:
+    0 24px 54px rgba(11, 18, 32, 0.28),
+    0 0 0 6px var(--destination-accent-soft, rgba(0, 194, 168, 0.18));
+}
+
+body .dayflow-stop-marker.is-active b,
+body .dayflow-route-list li.is-active b {
+  background: linear-gradient(135deg, var(--destination-accent, #00c2a8), var(--destination-dark, #0b1220));
+}
+
+body .dayflow-route-list li.is-active {
+  transform: translateY(-1px);
+  border-color: var(--destination-accent, #00c2a8);
+  background:
+    radial-gradient(circle at top right, var(--destination-accent-soft, rgba(0, 194, 168, 0.14)), transparent 30%),
+    rgba(255, 255, 255, 0.96);
+  box-shadow: 0 16px 34px rgba(11, 18, 32, 0.1);
+}
+
+body .dayflow-active-stop {
+  display: grid;
+  gap: 2px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--destination-accent-soft, rgba(0, 194, 168, 0.2));
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top left, var(--destination-accent-soft, rgba(0, 194, 168, 0.14)), transparent 36%),
+    rgba(255, 255, 255, 0.9);
+}
+
+body .dayflow-active-stop span {
+  color: var(--destination-accent-strong, #0f545a);
+  font-size: 0.74rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+body .dayflow-active-stop strong {
+  color: #0b1220;
+}
+
+body .dayflow-active-stop small {
+  color: var(--muted, #607081);
+  line-height: 1.35;
+}
