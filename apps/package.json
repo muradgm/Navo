@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "verify:today-engine": "node scripts/verify-today-decision-engine.mjs",
     "verify:geo": "node scripts/verify-geo-points.mjs",
-    "verify:dayflow-base": "node scripts/verify-dayflow-base-stop.mjs"
+    "verify:dayflow-base": "node scripts/verify-dayflow-base-stop.mjs",
+    "verify:dayflow-stops": "node scripts/verify-dayflow-route-stops.mjs"
   },
   "dependencies": {
     "vite": "^7.0.0",
