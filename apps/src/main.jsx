@@ -35,6 +35,7 @@ import {
 import "./styles.css";
 import "./navo.css";
 import { defaultDestinationPack } from "./data/destinations/index.js";
+import { TodayDecisionWidget } from "./today-decision-widget.jsx";
 
 const CHF_TO_EUR = 1.04;
 const APP_NAME = "Navo";
@@ -639,16 +640,33 @@ function App() {
     window.clearTimeout(addToDay._timer);
     addToDay._timer = window.setTimeout(() => setToast(null), 1800);
   };
+
   const removeFromDay = (id) =>
     setPlan({
       ...plan,
       [selectedDay]: (plan[selectedDay] || []).filter((x) => x !== id),
     });
+
   const applyRecommendation = () =>
     setPlan({
       ...plan,
       [selectedDay]: preferenceRecommendation.recommended.map((a) => a.id),
     });
+
+  const applyTodayDecisionPlan = (ids) => {
+    setPlan({ ...plan, [selectedDay]: ids });
+    setToast(
+      lang === "en"
+        ? `Navo Decision · ${c.addedTo} ${selectedDay}`
+        : `Navo Entscheidung · ${c.addedTo} ${selectedDay}`,
+    );
+    window.clearTimeout(applyTodayDecisionPlan._timer);
+    applyTodayDecisionPlan._timer = window.setTimeout(
+      () => setToast(null),
+      1800,
+    );
+  };
+
   const toggleCheck = (idx) =>
     setChecked(
       checked.includes(idx)
@@ -731,6 +749,7 @@ function App() {
             title={c.today}
             subtitle={foodCopy.note || c.cookNote}
           />
+
           <WeatherPanel
             lang={lang}
             destination={destination}
@@ -740,6 +759,18 @@ function App() {
             tripDays={tripWeatherDays}
             setMood={setWeather}
           />
+
+          <TodayDecisionWidget
+            destination={destination}
+            lang={lang}
+            weather={weather}
+            energy={energy}
+            budgetEur={todayBudget}
+            selectedDay={selectedDay}
+            selectedIds={customIds}
+            onApplyPlan={applyTodayDecisionPlan}
+          />
+
           <div className="control-grid">
             <Select
               label={c.weather}
