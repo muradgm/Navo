@@ -1,5 +1,6 @@
 import { baselDestinationPack } from "./basel/index.js";
 import { barcelonaDestinationPack } from "./barcelona/index.js";
+import { getDestinationGeoManifest } from "../geo/index.js";
 import {
   destinationVisuals,
   fallbackDestinationVisuals,
@@ -13,14 +14,55 @@ const baseDestinationPacks = {
   barcelona: barcelonaDestinationPack,
 };
 
+function lonLat(geoPoint) {
+  if (!geoPoint) return undefined;
+  return [geoPoint.coordinates.lng, geoPoint.coordinates.lat];
+}
+
+function attachGeoData(id, pack) {
+  const manifest = getDestinationGeoManifest(id);
+  const baseGeo = manifest?.byId?.base;
+  const baseLocation = baseGeo
+    ? {
+        ...pack.baseLocation,
+        coordinates: lonLat(baseGeo),
+        geoPointId: baseGeo.id,
+        geoConfidence: baseGeo.confidence,
+      }
+    : pack.baseLocation;
+
+  const activities = pack.activities.map((activity) => {
+    const geo = manifest?.byId?.[activity.id];
+    if (!geo) return activity;
+
+    return {
+      ...activity,
+      coordinates: lonLat(geo),
+      geoPointId: geo.id,
+      geoCategory: geo.category,
+      geoConfidence: geo.confidence,
+      sourceUrl: activity.sourceUrl || geo.sourceUrl,
+    };
+  });
+
+  return {
+    ...pack,
+    baseLocation,
+    activities,
+  };
+}
+
 export const destinationPacks = Object.fromEntries(
-  Object.entries(baseDestinationPacks).map(([id, pack]) => [
-    id,
-    {
-      ...pack,
-      ...(destinationVisuals[id] || fallbackDestinationVisuals),
-    },
-  ]),
+  Object.entries(baseDestinationPacks).map(([id, pack]) => {
+    const geoPack = attachGeoData(id, pack);
+    return [
+      id,
+      {
+        ...geoPack,
+        ...(destinationVisuals[id] || fallbackDestinationVisuals),
+      },
+    ];
+  }),
 );
 
 export const destinationIds = Object.keys(destinationPacks);
