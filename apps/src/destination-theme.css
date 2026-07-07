@@ -45,7 +45,10 @@ body .hero > * {
   z-index: 1;
 }
 
-body .section,
+body .section {
+  background-color: rgba(255, 250, 242, 0.9) !important;
+}
+
 body .activity-card,
 body .info-card,
 body .grocery-card,
@@ -73,11 +76,15 @@ body .toast {
 }
 
 body .remaining,
-body .weather-panel,
 body .smart-panel,
 body .add-target-panel,
 body .special-plan {
   background: linear-gradient(135deg, var(--destination-accent-soft), rgba(255, 250, 242, 0.88)) !important;
+}
+
+body .weather-panel {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(255, 250, 242, 0.9)) !important;
+  border-color: rgba(19, 50, 74, 0.12) !important;
 }
 
 body .card-actions button + button,
