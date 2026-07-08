@@ -1488,37 +1488,6 @@ function InfoCard({ title, text, link }) {
   );
 }
 
-const dayFlowCoordinates = {
-  zoo: [7.5776, 47.5482],
-  rhine: [7.5906, 47.5576],
-  paper: [7.6027, 47.5541],
-  augusta: [7.7211, 47.5337],
-  stlouis: [7.5622, 47.59],
-  aquabasilea: [7.6933, 47.5214],
-  lange: [7.6114, 47.5806],
-  markthalle: [7.5894, 47.5497],
-  tinguely: [7.6144, 47.5598],
-  natural: [7.5901, 47.557],
-  merian: [7.6152, 47.5362],
-  kannenfeld: [7.5717, 47.5635],
-  birskopfli: [7.6269, 47.545],
-  dreilaendereck: [7.5885, 47.5894],
-  "naturbad-riehen": [7.6456, 47.5829],
-  schuetzenmatt: [7.5708, 47.5524],
-  vitra: [7.6189, 47.601],
-  beyeler: [7.6502, 47.587],
-  kunstmuseum: [7.5941, 47.5545],
-  "toy-worlds": [7.5892, 47.5547],
-  "pharmacy-museum": [7.588, 47.5586],
-  "botanical-garden": [7.5826, 47.5597],
-  "solitude-park": [7.612, 47.56],
-  "st-johanns-park": [7.579, 47.5708],
-  erlenmattpark: [7.5995, 47.5734],
-  margarethenpark: [7.5744, 47.5447],
-  sarasinpark: [7.6475, 47.5847],
-  "spalentor-oldtown": [7.5813, 47.5585],
-  zurich: [8.5417, 47.3769],
-};
 
 function lonLatToTilePoint([lng, lat], zoom) {
   const sin = Math.sin((lat * Math.PI) / 180);
@@ -1533,7 +1502,6 @@ function buildDayFlowGeometry(stops) {
   const routeStops = buildDayFlowRouteStops({
     baseLocation: BASE_LOCATION,
     orderedStops: stops,
-    fallbackCoordinatesById: dayFlowCoordinates,
   });
 
   const coordStops =
