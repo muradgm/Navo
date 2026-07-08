@@ -96,6 +96,35 @@ function dayFlowMarkerOffset(point, markerPoints, dense) {
   };
 }
 
+function mapSearchUrl(activity) {
+  const query = activity?.mapQuery || activity?.en || activity?.de || "";
+  return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(query);
+}
+
+function geoConfidenceText(lang, value) {
+  const labels = {
+    en: {
+      verified: "Verified",
+      good: "Good",
+      "needs-check": "Needs check",
+    },
+    de: {
+      verified: "Verifiziert",
+      good: "Gut",
+      "needs-check": "Prüfen",
+    },
+  };
+
+  return labels[lang]?.[value] || value || labels[lang]["needs-check"];
+}
+
+function formatCoordinates(coordinates) {
+  if (!Array.isArray(coordinates) || coordinates.length !== 2) return "";
+  const [lng, lat] = coordinates;
+  if (!Number.isFinite(lng) || !Number.isFinite(lat)) return "";
+  return lat.toFixed(4) + ", " + lng.toFixed(4);
+}
+
 export function NavoDayFlowMap({ lang, plan, variant, variantLabel, baseLocation }) {
   const geometry = buildDayFlowGeometry(plan.ordered || [], baseLocation);
   const tiles = tileListForCenter(geometry.center, geometry.zoom + 1);
@@ -109,6 +138,24 @@ export function NavoDayFlowMap({ lang, plan, variant, variantLabel, baseLocation
   const activeStep = plan.routeSteps?.find(
     (step) => step.activity.id === activeStopId,
   );
+  const activeActivity = activeStep?.activity || null;
+  const activeTitle = activeActivity
+    ? lang === "en"
+      ? activeActivity.en
+      : activeActivity.de
+    : "";
+  const activeMeta = activeActivity
+    ? [
+        activeActivity.area,
+        activeActivity.time,
+        activeActivity.transit,
+      ].filter(Boolean).join(" · ")
+    : "";
+  const activeMapUrl = activeActivity ? mapSearchUrl(activeActivity) : "";
+  const activeCoordinates = activeActivity
+    ? formatCoordinates(activeActivity.coordinates)
+    : "";
+  const activeConfidence = activeActivity?.geoConfidence || "needs-check";
 
   const activateStop = (stop) => {
     if (!stop || stop.id === "base") return;
@@ -287,21 +334,55 @@ export function NavoDayFlowMap({ lang, plan, variant, variantLabel, baseLocation
         </div>
       </div>
 
-      {activeStep && (
-        <div className="dayflow-active-stop" aria-live="polite">
-          <span>
-            {lang === "en"
-              ? `Selected stop ${activeStep.index}`
-              : `Ausgewählter Stopp ${activeStep.index}`}
-          </span>
-          <strong>
-            {lang === "en" ? activeStep.activity.en : activeStep.activity.de}
-          </strong>
-          <small>
-            {activeStep.transferMinutes} min{" "}
-            {lang === "en" ? "from previous" : "vom vorherigen Stopp"} ·{" "}
-            {activeStep.activity.type} · {activeStep.activity.time}
-          </small>
+      {activeStep && activeActivity && (
+        <div
+          className="dayflow-active-stop dayflow-selected-stop-panel"
+          aria-live="polite"
+        >
+          <div className="dayflow-selected-stop-main">
+            <span>
+              {lang === "en"
+                ? "Selected stop " + activeStep.index
+                : "Ausgewählter Stopp " + activeStep.index}
+            </span>
+            <strong>{activeTitle}</strong>
+            <small>{activeMeta}</small>
+          </div>
+
+          <div className="dayflow-selected-stop-grid">
+            <div>
+              <span>{lang === "en" ? "Transfer" : "Transfer"}</span>
+              <strong>
+                {activeStep.transferMinutes} min{" "}
+                {lang === "en" ? "from previous" : "vom vorherigen Stopp"}
+              </strong>
+            </div>
+            <div>
+              <span>{lang === "en" ? "Type" : "Typ"}</span>
+              <strong>{activeActivity.type}</strong>
+            </div>
+            <div>
+              <span>{lang === "en" ? "Geo confidence" : "Geo-Sicherheit"}</span>
+              <strong>{geoConfidenceText(lang, activeConfidence)}</strong>
+            </div>
+            {activeCoordinates && (
+              <div>
+                <span>{lang === "en" ? "Coordinates" : "Koordinaten"}</span>
+                <strong>{activeCoordinates}</strong>
+              </div>
+            )}
+          </div>
+
+          <div className="dayflow-selected-stop-actions">
+            <a href={activeMapUrl} target="_blank" rel="noreferrer">
+              {lang === "en" ? "Open in Maps" : "In Maps öffnen"}
+            </a>
+            {activeActivity.sourceUrl && (
+              <a href={activeActivity.sourceUrl} target="_blank" rel="noreferrer">
+                {lang === "en" ? "Source" : "Quelle"}
+              </a>
+            )}
+          </div>
         </div>
       )}
 
