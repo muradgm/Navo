@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { buildDayFlowRouteStops } from "./routeStops.js";
 
 function lonLatToTilePoint([lng, lat], zoom) {
@@ -104,6 +105,22 @@ export function NavoDayFlowMap({ lang, plan, variant, variantLabel, baseLocation
   const markerPoints = geometry.points.filter(
     (point, index) => point.stop.id !== "base" || index === 0,
   );
+  const [activeStopId, setActiveStopId] = useState(null);
+  const activeStep = plan.routeSteps?.find(
+    (step) => step.activity.id === activeStopId,
+  );
+
+  const activateStop = (stop) => {
+    if (!stop || stop.id === "base") return;
+    setActiveStopId(stop.id);
+  };
+
+  const handleStopKeyDown = (event, stop) => {
+    if (!["Enter", " "].includes(event.key)) return;
+    event.preventDefault();
+    activateStop(stop);
+  };
+
   const title = lang === "en" ? "DayFlow Map" : "DayFlow-Karte";
   const subtitle =
     lang === "en"
@@ -219,18 +236,37 @@ export function NavoDayFlowMap({ lang, plan, variant, variantLabel, baseLocation
         {markerPoints.map((point, i) => {
           const isBase = point.stop.id === "base";
           const number = isBase ? "B" : point.index;
+          const title = lang === "en" ? point.stop.en : point.stop.de;
+          const isActive = !isBase && activeStopId === point.stop.id;
+
           return (
             <div
               key={`${point.stop.id}-${i}`}
-              className={`${isBase ? "dayflow-stop-marker base" : "dayflow-stop-marker"} ${dense ? "compact" : ""}`}
+              className={`${isBase ? "dayflow-stop-marker base" : "dayflow-stop-marker"} ${dense ? "compact" : ""} ${isActive ? "is-active" : ""}`}
               style={{
                 left: `${(point.x / geometry.viewWidth) * 100}%`,
                 top: `${(point.y / geometry.viewHeight) * 100}%`,
                 ...dayFlowMarkerOffset(point, markerPoints, dense),
               }}
+              role="button"
+              tabIndex={0}
+              aria-current={isActive ? "step" : undefined}
+              aria-label={
+                isBase
+                  ? lang === "en"
+                    ? "Base stop"
+                    : "Basis-Stopp"
+                  : lang === "en"
+                    ? `Select stop ${number}: ${title}`
+                    : `Stopp ${number} auswählen: ${title}`
+              }
+              onMouseEnter={() => activateStop(point.stop)}
+              onFocus={() => activateStop(point.stop)}
+              onClick={() => activateStop(point.stop)}
+              onKeyDown={(event) => handleStopKeyDown(event, point.stop)}
             >
               <b>{number}</b>
-              <span>{lang === "en" ? point.stop.en : point.stop.de}</span>
+              <span>{title}</span>
             </div>
           );
         })}
@@ -251,12 +287,47 @@ export function NavoDayFlowMap({ lang, plan, variant, variantLabel, baseLocation
         </div>
       </div>
 
+      {activeStep && (
+        <div className="dayflow-active-stop" aria-live="polite">
+          <span>
+            {lang === "en"
+              ? `Selected stop ${activeStep.index}`
+              : `Ausgewählter Stopp ${activeStep.index}`}
+          </span>
+          <strong>
+            {lang === "en" ? activeStep.activity.en : activeStep.activity.de}
+          </strong>
+          <small>
+            {activeStep.transferMinutes} min{" "}
+            {lang === "en" ? "from previous" : "vom vorherigen Stopp"} ·{" "}
+            {activeStep.activity.type} · {activeStep.activity.time}
+          </small>
+        </div>
+      )}
+
       {plan.routeSteps?.length > 0 && (
         <ol className="dayflow-route-list" aria-label={routeListLabel}>
           {plan.routeSteps.map((step) => {
             const title = lang === "en" ? step.activity.en : step.activity.de;
+            const isActive = activeStopId === step.activity.id;
+
             return (
-              <li key={step.activity.id}>
+              <li
+                key={step.activity.id}
+                className={isActive ? "is-active" : ""}
+                role="button"
+                tabIndex={0}
+                aria-current={isActive ? "step" : undefined}
+                aria-label={
+                  lang === "en"
+                    ? `Select route stop ${step.index}: ${title}`
+                    : `Routenstopp ${step.index} auswählen: ${title}`
+                }
+                onMouseEnter={() => activateStop(step.activity)}
+                onFocus={() => activateStop(step.activity)}
+                onClick={() => activateStop(step.activity)}
+                onKeyDown={(event) => handleStopKeyDown(event, step.activity)}
+              >
                 <b>{step.index}</b>
                 <div>
                   <strong>{title}</strong>
