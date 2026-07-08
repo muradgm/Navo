@@ -9,15 +9,13 @@ export function hasStopCoordinates(stop) {
   );
 }
 
-export function coordinatesForStop(stop, fallbackCoordinatesById = {}) {
-  if (hasStopCoordinates(stop)) return stop.coordinates;
-  return fallbackCoordinatesById[stop?.id] || null;
+export function coordinatesForStop(stop) {
+  return hasStopCoordinates(stop) ? stop.coordinates : null;
 }
 
 export function buildDayFlowRouteStops({
   baseLocation,
   orderedStops = [],
-  fallbackCoordinatesById = {},
 } = {}) {
   const baseStop = createDayFlowBaseStop(baseLocation);
 
@@ -25,7 +23,7 @@ export function buildDayFlowRouteStops({
     baseStop,
     ...orderedStops.map((stop) => ({
       ...stop,
-      coordinates: coordinatesForStop(stop, fallbackCoordinatesById),
+      coordinates: coordinatesForStop(stop),
     })),
   ].filter((stop) => hasStopCoordinates(stop));
 }

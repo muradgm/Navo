@@ -7,10 +7,10 @@ import {
 const errors = [];
 
 for (const [destinationId, pack] of Object.entries(destinationPacks)) {
-  const sampleStops = pack.activities.slice(0, 5);
+  const routeCandidateStops = pack.activities;
   const routeStops = buildDayFlowRouteStops({
     baseLocation: pack.baseLocation,
-    orderedStops: sampleStops,
+    orderedStops: routeCandidateStops,
   });
   const missing = getMissingDayFlowCoordinates(routeStops);
 
