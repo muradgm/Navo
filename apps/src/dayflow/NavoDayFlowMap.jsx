@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { dayFlowMapEngine } from "./mapEngine.js";
 import { buildDayFlowRouteStops } from "./routeStops.js";
 
 function lonLatToTilePoint([lng, lat], zoom) {
@@ -171,8 +172,8 @@ export function NavoDayFlowMap({ lang, plan, variant, variantLabel, baseLocation
   const title = lang === "en" ? "DayFlow Map" : "DayFlow-Karte";
   const subtitle =
     lang === "en"
-      ? "Real Basel map tiles with a Navo-owned route layer, numbered stops, and day-planning controls."
-      : "Echte Basel-Kartendaten mit eigener Navo-Routenschicht, nummerierten Stopps und Tagesplan-Steuerung.";
+      ? "Route-aware map preview with a Navo-owned route layer, numbered stops, and day-planning controls."
+      : "Routenbewusste Kartenvorschau mit eigener Navo-Routenschicht, nummerierten Stopps und Tagesplan-Steuerung.";
   const empty =
     lang === "en"
       ? "Add at least one activity to draw the route."
@@ -198,6 +199,10 @@ export function NavoDayFlowMap({ lang, plan, variant, variantLabel, baseLocation
               : "Eine echte Karte, neu gedacht für euren Tag."}
           </h4>
           <p>{subtitle}</p>
+          <div className="dayflow-map-engine-badge">
+            <span>{dayFlowMapEngine.label[lang]}</span>
+            <small>{dayFlowMapEngine.note[lang]}</small>
+          </div>
         </div>
         <div className="dayflow-map-meta">
           <strong>{plan.score}</strong>
@@ -208,6 +213,8 @@ export function NavoDayFlowMap({ lang, plan, variant, variantLabel, baseLocation
 
       <div
         className={`dayflow-map-shell ${dense ? "dense" : ""} ${overloaded ? "overloaded" : ""}`}
+        data-map-engine={dayFlowMapEngine.id}
+        data-map-engine-status={dayFlowMapEngine.status}
         role="img"
         aria-label={
           lang === "en"
