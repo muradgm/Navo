@@ -36,6 +36,7 @@ import "./styles.css";
 import "./navo.css";
 import { defaultDestinationPack } from "./data/destinations/index.js";
 import { TodayDecisionWidget } from "./today-decision-widget.jsx";
+import { buildDayFlowRouteStops } from "./dayflow/routeStops.js";
 
 const CHF_TO_EUR = 1.04;
 const APP_NAME = "Navo";
@@ -1519,16 +1520,6 @@ const dayFlowCoordinates = {
   zurich: [8.5417, 47.3769],
 };
 
-const dayFlowBaseStop = {
-  id: "base",
-  en: BASE_LOCATION.label,
-  de: BASE_LOCATION.label,
-  area: BASE_LOCATION.address,
-  time: "Base",
-  transit: "Start / end",
-  coordinates: [7.5993, 47.5614],
-};
-
 function lonLatToTilePoint([lng, lat], zoom) {
   const sin = Math.sin((lat * Math.PI) / 180);
   const scale = 256 * Math.pow(2, zoom);
@@ -1538,22 +1529,15 @@ function lonLatToTilePoint([lng, lat], zoom) {
   };
 }
 
-function getStopCoordinates(stop) {
-  return (
-    stop.coordinates ||
-    dayFlowCoordinates[stop.id] ||
-    dayFlowBaseStop.coordinates
-  );
-}
-
 function buildDayFlowGeometry(stops) {
-  const routeStops = stops.length
-    ? [dayFlowBaseStop, ...stops, dayFlowBaseStop]
-    : [dayFlowBaseStop];
-  const coordStops = routeStops.map((stop) => ({
-    ...stop,
-    coordinates: getStopCoordinates(stop),
-  }));
+  const routeStops = buildDayFlowRouteStops({
+    baseLocation: BASE_LOCATION,
+    orderedStops: stops,
+    fallbackCoordinatesById: dayFlowCoordinates,
+  });
+
+  const coordStops =
+    routeStops.length > 1 ? [...routeStops, routeStops[0]] : routeStops;
   const zoom = 13;
   const projected = coordStops.map((stop) => ({
     stop,
