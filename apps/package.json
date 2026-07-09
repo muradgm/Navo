@@ -13,10 +13,10 @@
     "verify:dayflow-stops": "node scripts/verify-dayflow-route-stops.mjs"
   },
   "dependencies": {
-    "vite": "^7.0.0",
+    "lucide-react": "^0.468.0",
+    "maplibre-gl": "^5.24.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "lucide-react": "^0.468.0"
-  },
-  "devDependencies": {}
+    "vite": "^7.0.0"
+  }
 }
