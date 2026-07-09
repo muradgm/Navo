@@ -242,3 +242,28 @@ body .dayflow-selected-stop-actions a + a {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+body .dayflow-map-engine-badge {
+  display: inline-grid;
+  gap: 2px;
+  width: fit-content;
+  margin-top: 8px;
+  padding: 8px 10px;
+  border: 1px solid rgba(19, 50, 74, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+body .dayflow-map-engine-badge span {
+  color: var(--destination-accent-strong, #0f545a);
+  font-size: 0.7rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+body .dayflow-map-engine-badge small {
+  color: var(--muted, #607081);
+  font-size: 0.78rem;
+  line-height: 1.3;
+}
