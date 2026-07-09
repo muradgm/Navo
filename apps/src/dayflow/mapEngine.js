@@ -10,14 +10,14 @@ export const DAYFLOW_MAP_ENGINE_STATUS = {
 };
 
 export const dayFlowMapEngine = Object.freeze({
-  id: DAYFLOW_MAP_ENGINES.STATIC_TILE_MOSAIC,
-  status: DAYFLOW_MAP_ENGINE_STATUS.PLACEHOLDER,
+  id: DAYFLOW_MAP_ENGINES.MAPLIBRE,
+  status: DAYFLOW_MAP_ENGINE_STATUS.EXPERIMENTAL,
   label: {
-    en: "Static map preview",
-    de: "Statische Kartenvorschau",
+    en: "Interactive map preview",
+    de: "Interaktive Kartenvorschau",
   },
   note: {
-    en: "Temporary visual map layer. Interactive map engine comes next.",
-    de: "Temporäre Kartenansicht. Interaktive Karten-Engine folgt als Nächstes.",
+    en: "Interactive map engine preview. Routing intelligence comes next.",
+    de: "Interaktive Karten-Engine-Vorschau. Routenintelligenz folgt als Nächstes.",
   },
 });

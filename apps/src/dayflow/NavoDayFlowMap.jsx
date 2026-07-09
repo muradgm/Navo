@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { DayFlowMapLibreLayer } from "./DayFlowMapLibreLayer.jsx";
 import { dayFlowMapEngine } from "./mapEngine.js";
 import { buildDayFlowRouteStops } from "./routeStops.js";
 
@@ -56,6 +57,7 @@ function buildDayFlowGeometry(stops, baseLocation) {
       .map((point) => `${point.x.toFixed(1)},${point.y.toFixed(1)}`)
       .join(" "),
     center: [centerLng, centerLat],
+    routeCoordinates: coordStops.map((stop) => stop.coordinates),
     zoom,
     viewWidth,
     viewHeight,
@@ -222,70 +224,14 @@ export function NavoDayFlowMap({ lang, plan, variant, variantLabel, baseLocation
             : "Navo Routenkarte für Basel-Tagesplan"
         }
       >
-        <div className="osm-tile-grid" aria-hidden="true">
-          {tiles.map((tile) => (
-            <img
-              key={tile.key}
-              src={tile.src}
-              style={{
-                left: tile.left,
-                top: tile.top,
-                width: tile.size,
-                height: tile.size,
-              }}
-              alt=""
-              loading="lazy"
-              decoding="async"
-            />
-          ))}
-        </div>
+        <DayFlowMapLibreLayer
+          geometry={geometry}
+          markerPoints={markerPoints}
+          lang={lang}
+          activeStopId={activeStopId}
+          onSelectStop={activateStop}
+        />
         <div className="dayflow-map-tint" aria-hidden="true" />
-        <svg
-          className="dayflow-route-svg"
-          viewBox={`0 0 ${geometry.viewWidth} ${geometry.viewHeight}`}
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          <defs>
-            <linearGradient
-              id="dayflowRouteGradient"
-              x1="0%"
-              y1="0%"
-              x2="100%"
-              y2="100%"
-            >
-              <stop offset="0%" stopColor="#00C2A8" />
-              <stop offset="58%" stopColor="#15AFC7" />
-              <stop offset="100%" stopColor="#13324A" />
-            </linearGradient>
-            <filter id="dayflowGlow">
-              <feGaussianBlur stdDeviation="5" result="coloredBlur" />
-              <feMerge>
-                <feMergeNode in="coloredBlur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
-          {geometry.points.length > 1 && (
-            <polyline
-              className="dayflow-route-shadow"
-              points={geometry.routePath}
-            />
-          )}
-          {geometry.points.length > 1 && (
-            <polyline
-              className="dayflow-route-line"
-              points={geometry.routePath}
-              filter="url(#dayflowGlow)"
-            />
-          )}
-          {geometry.points.length > 1 && (
-            <polyline
-              className={`dayflow-route-pulse ${variant === "rain" ? "rain" : ""}`}
-              points={geometry.routePath}
-            />
-          )}
-        </svg>
 
         {markerPoints.map((point, i) => {
           const isBase = point.stop.id === "base";
