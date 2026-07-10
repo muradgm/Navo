@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { DayFlowMapLibreLayer } from "./DayFlowMapLibreLayer.jsx";
 import { dayFlowMapEngine } from "./mapEngine.js";
 import { buildDayFlowRouteStops } from "./routeStops.js";
@@ -155,6 +155,7 @@ export function NavoDayFlowMap({ lang, plan, variant, variantLabel, baseLocation
       ].filter(Boolean).join(" · ")
     : "";
   const activeMapUrl = activeActivity ? mapSearchUrl(activeActivity) : "";
+  const activeSourceUrl = activeActivity?.sourceUrl || activeActivity?.official || "";
   const activeCoordinates = activeActivity
     ? formatCoordinates(activeActivity.coordinates)
     : "";
@@ -330,8 +331,8 @@ export function NavoDayFlowMap({ lang, plan, variant, variantLabel, baseLocation
             <a href={activeMapUrl} target="_blank" rel="noreferrer">
               {lang === "en" ? "Open in Maps" : "In Maps öffnen"}
             </a>
-            {activeActivity.sourceUrl && (
-              <a href={activeActivity.sourceUrl} target="_blank" rel="noreferrer">
+            {activeSourceUrl && (
+              <a href={activeSourceUrl} target="_blank" rel="noreferrer">
                 {lang === "en" ? "Source" : "Quelle"}
               </a>
             )}
