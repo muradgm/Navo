@@ -53,49 +53,11 @@ function buildDayFlowGeometry(stops, baseLocation) {
     coordStops.length;
   return {
     points,
-    routePath: points
-      .map((point) => `${point.x.toFixed(1)},${point.y.toFixed(1)}`)
-      .join(" "),
     center: [centerLng, centerLat],
     routeCoordinates: coordStops.map((stop) => stop.coordinates),
     zoom,
     viewWidth,
     viewHeight,
-  };
-}
-
-function tileListForCenter(center, zoom = 14) {
-  const point = lonLatToTilePoint(center, zoom);
-  const centerX = Math.floor(point.x / 256);
-  const centerY = Math.floor(point.y / 256);
-  const tiles = [];
-  const radius = 2;
-  const size = 100 / (radius * 2 + 1);
-  for (let y = -radius; y <= radius; y += 1) {
-    for (let x = -radius; x <= radius; x += 1) {
-      tiles.push({
-        key: `${centerX + x}-${centerY + y}`,
-        src: `https://tile.openstreetmap.org/${zoom}/${centerX + x}/${centerY + y}.png`,
-        left: `${radius * size + x * size}%`,
-        top: `${radius * size + y * size}%`,
-        size: `${size}%`,
-      });
-    }
-  }
-  return tiles;
-}
-
-function dayFlowMarkerOffset(point, markerPoints, dense) {
-  if (!dense || point.stop.id === "base") return {};
-  const closeToAnotherMarker = markerPoints.some((other) => {
-    if (other === point) return false;
-    return Math.hypot(point.x - other.x, point.y - other.y) < 68;
-  });
-  if (!closeToAnotherMarker) return {};
-  const angle = ((point.index || 1) * 137.5 * Math.PI) / 180;
-  return {
-    "--pin-dx": `${Math.round(Math.cos(angle) * 24)}px`,
-    "--pin-dy": `${Math.round(Math.sin(angle) * 24)}px`,
   };
 }
 
@@ -130,7 +92,6 @@ function formatCoordinates(coordinates) {
 
 export function NavoDayFlowMap({ lang, plan, variant, variantLabel, baseLocation }) {
   const geometry = buildDayFlowGeometry(plan.ordered || [], baseLocation);
-  const tiles = tileListForCenter(geometry.center, geometry.zoom + 1);
   const stopCount = Math.max(0, geometry.points.length - 2);
   const dense = stopCount > 4;
   const overloaded = stopCount > 7;
@@ -218,7 +179,6 @@ export function NavoDayFlowMap({ lang, plan, variant, variantLabel, baseLocation
         className={`dayflow-map-shell ${dense ? "dense" : ""} ${overloaded ? "overloaded" : ""}`}
         data-map-engine={dayFlowMapEngine.id}
         data-map-engine-status={dayFlowMapEngine.status}
-        role="img"
         aria-label={
           lang === "en"
             ? "Navo route map for Basel day plan"
@@ -233,44 +193,6 @@ export function NavoDayFlowMap({ lang, plan, variant, variantLabel, baseLocation
           onSelectStop={activateStop}
         />
         <div className="dayflow-map-tint" aria-hidden="true" />
-
-        {markerPoints.map((point, i) => {
-          const isBase = point.stop.id === "base";
-          const number = isBase ? "B" : point.index;
-          const title = lang === "en" ? point.stop.en : point.stop.de;
-          const isActive = !isBase && activeStopId === point.stop.id;
-
-          return (
-            <div
-              key={`${point.stop.id}-${i}`}
-              className={`${isBase ? "dayflow-stop-marker base" : "dayflow-stop-marker"} ${dense ? "compact" : ""} ${isActive ? "is-active" : ""}`}
-              style={{
-                left: `${(point.x / geometry.viewWidth) * 100}%`,
-                top: `${(point.y / geometry.viewHeight) * 100}%`,
-                ...dayFlowMarkerOffset(point, markerPoints, dense),
-              }}
-              role="button"
-              tabIndex={0}
-              aria-current={isActive ? "step" : undefined}
-              aria-label={
-                isBase
-                  ? lang === "en"
-                    ? "Base stop"
-                    : "Basis-Stopp"
-                  : lang === "en"
-                    ? `Select stop ${number}: ${title}`
-                    : `Stopp ${number} auswählen: ${title}`
-              }
-              onMouseEnter={() => activateStop(point.stop)}
-              onFocus={() => activateStop(point.stop)}
-              onClick={() => activateStop(point.stop)}
-              onKeyDown={(event) => handleStopKeyDown(event, point.stop)}
-            >
-              <b>{number}</b>
-              <span>{title}</span>
-            </div>
-          );
-        })}
 
         {dense && <div className="dayflow-density-note">{densityNote}</div>}
 
