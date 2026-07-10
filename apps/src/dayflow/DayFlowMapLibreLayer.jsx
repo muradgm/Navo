@@ -93,6 +93,12 @@ function syncRouteLayer(map, coordinates) {
   });
 }
 
+function routeCoordinateKey(coordinates = []) {
+  return coordinates
+    .map((coordinate) => coordinate.map((value) => value.toFixed(6)).join(","))
+    .join("|");
+}
+
 export function DayFlowMapLibreLayer({
   geometry,
   markerPoints,
@@ -103,19 +109,21 @@ export function DayFlowMapLibreLayer({
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const markersRef = useRef([]);
+  const initialCenterRef = useRef(geometry.center);
 
-  const routeCoordinates = useMemo(
-    () => geometry.routeCoordinates || [],
-    [geometry.routeCoordinates],
+  const routeCoordinates = geometry.routeCoordinates || [];
+  const routeKey = useMemo(
+    () => routeCoordinateKey(routeCoordinates),
+    [routeCoordinates],
   );
 
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) return;
+    if (!containerRef.current || mapRef.current) return undefined;
 
     mapRef.current = new maplibregl.Map({
       container: containerRef.current,
       style: rasterStyle,
-      center: geometry.center,
+      center: initialCenterRef.current,
       zoom: 12.5,
       attributionControl: false,
     });
@@ -136,16 +144,31 @@ export function DayFlowMapLibreLayer({
       mapRef.current?.remove();
       mapRef.current = null;
     };
-  }, [geometry.center]);
+  }, []);
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map) return;
+    if (!map) return undefined;
 
-    const sync = () => {
+    const syncRoute = () => {
       syncRouteLayer(map, routeCoordinates);
       fitRoute(map, routeCoordinates);
+    };
 
+    if (map.loaded()) {
+      syncRoute();
+      return undefined;
+    }
+
+    map.once("load", syncRoute);
+    return () => map.off("load", syncRoute);
+  }, [routeKey]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return undefined;
+
+    const syncMarkers = () => {
       markersRef.current.forEach((marker) => marker.remove());
 
       markersRef.current = markerPoints.map((point) => {
@@ -193,11 +216,13 @@ export function DayFlowMapLibreLayer({
     };
 
     if (map.loaded()) {
-      sync();
-    } else {
-      map.once("load", sync);
+      syncMarkers();
+      return undefined;
     }
-  }, [activeStopId, lang, markerPoints, onSelectStop, routeCoordinates]);
+
+    map.once("load", syncMarkers);
+    return () => map.off("load", syncMarkers);
+  }, [activeStopId, lang, markerPoints, onSelectStop]);
 
   return <div className="dayflow-maplibre-layer" ref={containerRef} />;
 }
