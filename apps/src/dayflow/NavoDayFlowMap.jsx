@@ -1,7 +1,12 @@
-import React, { useState } from "react";
-import { DayFlowMapLibreLayer } from "./DayFlowMapLibreLayer.jsx";
+import React, { Suspense, lazy, useState } from "react";
 import { dayFlowMapEngine } from "./mapEngine.js";
 import { buildDayFlowRouteStops } from "./routeStops.js";
+
+const DayFlowMapLibreLayer = lazy(() =>
+  import("./DayFlowMapLibreLayer.jsx").then((module) => ({
+    default: module.DayFlowMapLibreLayer,
+  })),
+);
 
 function lonLatToTilePoint([lng, lat], zoom) {
   const sin = Math.sin((lat * Math.PI) / 180);
@@ -185,13 +190,19 @@ export function NavoDayFlowMap({ lang, plan, variant, variantLabel, baseLocation
             : "Navo Routenkarte für Basel-Tagesplan"
         }
       >
-        <DayFlowMapLibreLayer
-          geometry={geometry}
-          markerPoints={markerPoints}
-          lang={lang}
-          activeStopId={activeStopId}
-          onSelectStop={activateStop}
-        />
+        <Suspense
+          fallback={
+            <div className="dayflow-maplibre-layer" aria-hidden="true" />
+          }
+        >
+          <DayFlowMapLibreLayer
+            geometry={geometry}
+            markerPoints={markerPoints}
+            lang={lang}
+            activeStopId={activeStopId}
+            onSelectStop={activateStop}
+          />
+        </Suspense>
         <div className="dayflow-map-tint" aria-hidden="true" />
 
         {dense && <div className="dayflow-density-note">{densityNote}</div>}
