@@ -90,7 +90,14 @@ function formatCoordinates(coordinates) {
   return lat.toFixed(4) + ", " + lng.toFixed(4);
 }
 
-export function NavoDayFlowMap({ lang, plan, variant, variantLabel, baseLocation }) {
+export function NavoDayFlowMap({
+  lang,
+  plan,
+  variant,
+  variantLabel,
+  baseLocation,
+  destinationName,
+}) {
   const geometry = buildDayFlowGeometry(plan.ordered || [], baseLocation);
   const stopCount = Math.max(0, geometry.points.length - 2);
   const dense = stopCount > 4;
@@ -181,8 +188,8 @@ export function NavoDayFlowMap({ lang, plan, variant, variantLabel, baseLocation
         data-map-engine-status={dayFlowMapEngine.status}
         aria-label={
           lang === "en"
-            ? "Navo route map for Basel day plan"
-            : "Navo Routenkarte für Basel-Tagesplan"
+            ? `Navo route map for ${destinationName} day plan`
+            : `Navo Routenkarte für ${destinationName}-Tagesplan`
         }
       >
         <DayFlowMapLibreLayer

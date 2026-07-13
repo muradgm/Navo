@@ -10,6 +10,33 @@
   --destination-hero-overlay-to: rgba(13, 41, 45, 0.36);
 }
 
+.destination-switcher {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 50;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  background: rgba(4, 13, 29, 0.86);
+  color: white;
+  font: 600 12px Poppins, sans-serif;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(12px);
+}
+
+.destination-switcher select {
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 6px 10px;
+  font: 600 12px Poppins, sans-serif;
+}
+
 body {
   background:
     radial-gradient(circle at top left, var(--destination-page-glow) 0, rgba(247, 241, 232, 0.92) 38%, #fffaf2 100%) !important;
