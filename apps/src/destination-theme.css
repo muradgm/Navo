@@ -1,0 +1,104 @@
+:root {
+  --destination-hero-image: none;
+  --destination-accent: #0e7c86;
+  --destination-accent-soft: rgba(14, 124, 134, 0.16);
+  --destination-accent-strong: #0f545a;
+  --destination-dark: #0d292d;
+  --destination-page-glow: rgba(14, 124, 134, 0.18);
+  --destination-surface-tint: rgba(255, 250, 242, 0.86);
+  --destination-hero-overlay-from: rgba(7, 19, 28, 0.72);
+  --destination-hero-overlay-to: rgba(13, 41, 45, 0.36);
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, var(--destination-page-glow) 0, rgba(247, 241, 232, 0.92) 38%, #fffaf2 100%) !important;
+}
+
+body .hero {
+  min-height: 430px;
+  background-image:
+    linear-gradient(135deg, var(--destination-hero-overlay-from), var(--destination-hero-overlay-to)),
+    var(--destination-hero-image) !important;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+body .hero::after {
+  background: var(--destination-accent-soft) !important;
+}
+
+body .hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.16), transparent 30%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.34));
+  pointer-events: none;
+  z-index: 0;
+}
+
+body .hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+body .section {
+  background-color: rgba(255, 250, 242, 0.9) !important;
+}
+
+body .activity-card,
+body .info-card,
+body .grocery-card,
+body .budget-card,
+body .timeline-card {
+  background-color: var(--destination-surface-tint);
+}
+
+body .header > svg,
+body .grocery-card > svg:first-child,
+body .transport-mode svg,
+body .capability svg {
+  color: var(--destination-accent) !important;
+}
+
+body .tabs button.active,
+body .chip.on,
+body .budget-line.strong,
+body .date,
+body .add-target-panel button,
+body .card-actions button,
+body .toast {
+  background: var(--destination-dark) !important;
+  border-color: var(--destination-dark) !important;
+}
+
+body .remaining,
+body .smart-panel,
+body .add-target-panel,
+body .special-plan {
+  background: linear-gradient(135deg, var(--destination-accent-soft), rgba(255, 250, 242, 0.88)) !important;
+}
+
+body .weather-panel {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(255, 250, 242, 0.9)) !important;
+  border-color: rgba(19, 50, 74, 0.12) !important;
+}
+
+body .card-actions button + button,
+body .link-row a {
+  background: var(--destination-accent-soft) !important;
+  color: var(--destination-accent-strong) !important;
+}
+
+body .tier {
+  background: color-mix(in srgb, var(--destination-dark) 88%, transparent) !important;
+}
+
+@media (min-width: 720px) {
+  body .hero {
+    min-height: 520px;
+  }
+}

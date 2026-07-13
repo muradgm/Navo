@@ -1,0 +1,347 @@
+/* DayFlow Map interaction polish
+   Keeps the existing static map model, but makes the route, pins, and list feel more intentional. */
+
+body .dayflow-map-card {
+  border-color: rgba(19, 50, 74, 0.12);
+  background:
+    radial-gradient(circle at top left, var(--destination-accent-soft, rgba(0, 194, 168, 0.16)), transparent 30%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(255, 250, 242, 0.94));
+}
+
+body .dayflow-map-copy {
+  align-items: center;
+}
+
+body .dayflow-map-copy span {
+  color: var(--destination-accent-strong, #0f545a);
+}
+
+body .dayflow-map-meta {
+  background:
+    linear-gradient(135deg, var(--destination-dark, #0b1220), color-mix(in srgb, var(--destination-dark, #0b1220) 84%, #ffffff 16%));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+body .dayflow-map-shell {
+  border-color: rgba(19, 50, 74, 0.18);
+  background: #eef3ef;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.64),
+    0 18px 50px rgba(11, 18, 32, 0.12);
+}
+
+body .dayflow-map-shell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), transparent 36%, rgba(11, 18, 32, 0.08)),
+    radial-gradient(circle at 50% 50%, transparent 48%, rgba(11, 18, 32, 0.12));
+}
+
+body .osm-tile-grid {
+  opacity: 0.8;
+  filter: grayscale(0.58) sepia(0.08) saturate(0.96) contrast(1.02) brightness(1.08);
+}
+
+body .dayflow-route-shadow {
+  stroke-width: 24;
+  opacity: 0.22;
+}
+
+body .dayflow-route-line {
+  stroke-width: 10;
+  filter: drop-shadow(0 10px 18px rgba(11, 18, 32, 0.22));
+}
+
+body .dayflow-route-pulse {
+  stroke-width: 3;
+  opacity: 0.96;
+}
+
+body .dayflow-stop-marker {
+  cursor: pointer;
+  border-color: rgba(19, 50, 74, 0.14);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow:
+    0 16px 34px rgba(11, 18, 32, 0.2),
+    0 0 0 3px rgba(255, 255, 255, 0.4);
+}
+
+body .dayflow-stop-marker:hover,
+body .dayflow-stop-marker:focus-visible {
+  z-index: 9;
+  transform: translate(calc(-50% + var(--pin-dx, 0px)), calc(-50% + var(--pin-dy, 0px))) scale(1.07);
+  box-shadow:
+    0 22px 44px rgba(11, 18, 32, 0.24),
+    0 0 0 5px var(--destination-accent-soft, rgba(0, 194, 168, 0.18));
+}
+
+body .dayflow-stop-marker b,
+body .dayflow-route-list b {
+  background: linear-gradient(135deg, var(--destination-accent, #00c2a8), var(--destination-dark, #0b1220));
+}
+
+body .dayflow-stop-marker.base b {
+  box-shadow: 0 0 0 4px var(--destination-accent-soft, rgba(0, 194, 168, 0.18));
+}
+
+body .dayflow-stop-marker span {
+  max-width: 160px;
+}
+
+body .dayflow-bottom-sheet {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: color-mix(in srgb, var(--destination-dark, #0b1220) 90%, transparent);
+}
+
+body .dayflow-mini-stats span {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+body .dayflow-route-list li:hover {
+  transform: translateY(-1px);
+  border-color: var(--destination-accent-soft, rgba(0, 194, 168, 0.18));
+  box-shadow: 0 14px 30px rgba(11, 18, 32, 0.08);
+}
+
+body .dayflow-stop-marker.is-active {
+  z-index: 12;
+  transform: translate(calc(-50% + var(--pin-dx, 0px)), calc(-50% + var(--pin-dy, 0px))) scale(1.1);
+  border-color: var(--destination-accent, #00c2a8);
+  box-shadow:
+    0 24px 54px rgba(11, 18, 32, 0.28),
+    0 0 0 6px var(--destination-accent-soft, rgba(0, 194, 168, 0.18));
+}
+
+body .dayflow-stop-marker.is-active b,
+body .dayflow-route-list li.is-active b {
+  background: linear-gradient(135deg, var(--destination-accent, #00c2a8), var(--destination-dark, #0b1220));
+}
+
+body .dayflow-route-list li.is-active {
+  transform: translateY(-1px);
+  border-color: var(--destination-accent, #00c2a8);
+  background:
+    radial-gradient(circle at top right, var(--destination-accent-soft, rgba(0, 194, 168, 0.14)), transparent 30%),
+    rgba(255, 255, 255, 0.96);
+  box-shadow: 0 16px 34px rgba(11, 18, 32, 0.1);
+}
+
+body .dayflow-active-stop {
+  display: grid;
+  gap: 2px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--destination-accent-soft, rgba(0, 194, 168, 0.2));
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top left, var(--destination-accent-soft, rgba(0, 194, 168, 0.14)), transparent 36%),
+    rgba(255, 255, 255, 0.9);
+}
+
+body .dayflow-active-stop span {
+  color: var(--destination-accent-strong, #0f545a);
+  font-size: 0.74rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+body .dayflow-active-stop strong {
+  color: #0b1220;
+}
+
+body .dayflow-active-stop small {
+  color: var(--muted, #607081);
+  line-height: 1.35;
+}
+
+@media (max-width: 760px) {
+  body .dayflow-map-shell {
+    min-height: 430px;
+  }
+
+  body .dayflow-stop-marker:not(.base) {
+    box-shadow:
+      0 12px 24px rgba(11, 18, 32, 0.18),
+      0 0 0 3px rgba(255, 255, 255, 0.52);
+  }
+
+  body .dayflow-bottom-sheet {
+    max-height: 42%;
+  }
+}
+
+
+body .dayflow-selected-stop-panel {
+  gap: 14px;
+  padding: 16px;
+}
+
+body .dayflow-selected-stop-main {
+  display: grid;
+  gap: 3px;
+}
+
+body .dayflow-selected-stop-main strong {
+  font-size: 1rem;
+}
+
+body .dayflow-selected-stop-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+body .dayflow-selected-stop-grid div {
+  display: grid;
+  gap: 3px;
+  padding: 10px 12px;
+  border: 1px solid rgba(19, 50, 74, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.74);
+}
+
+body .dayflow-selected-stop-grid strong {
+  color: #0b1220;
+  font-size: 0.82rem;
+  line-height: 1.3;
+}
+
+body .dayflow-selected-stop-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+body .dayflow-selected-stop-actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--destination-accent-soft, rgba(0, 194, 168, 0.2));
+  background: var(--destination-dark, #0b1220);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+body .dayflow-selected-stop-actions a + a {
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--destination-dark, #0b1220);
+}
+
+@media (max-width: 760px) {
+  body .dayflow-selected-stop-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+body .dayflow-map-engine-badge {
+  display: inline-grid;
+  gap: 2px;
+  width: fit-content;
+  margin-top: 8px;
+  padding: 8px 10px;
+  border: 1px solid rgba(19, 50, 74, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+body .dayflow-map-engine-badge span {
+  color: var(--destination-accent-strong, #0f545a);
+  font-size: 0.7rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+body .dayflow-map-engine-badge small {
+  color: var(--muted, #607081);
+  font-size: 0.78rem;
+  line-height: 1.3;
+}
+
+body .dayflow-maplibre-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+}
+
+body .dayflow-maplibre-layer .maplibregl-map {
+  width: 100%;
+  height: 100%;
+  font-family: inherit;
+}
+
+body .dayflow-maplibre-marker {
+  display: grid;
+  grid-template-columns: auto max-content;
+  align-items: center;
+  gap: 7px;
+  max-width: 190px;
+  padding: 6px 9px 6px 6px;
+  border: 1px solid rgba(19, 50, 74, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow:
+    0 14px 30px rgba(11, 18, 32, 0.2),
+    0 0 0 3px rgba(255, 255, 255, 0.46);
+  color: #0b1220;
+  cursor: pointer;
+}
+
+body .dayflow-maplibre-marker b {
+  display: grid;
+  place-items: center;
+  min-width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--destination-accent, #00c2a8), var(--destination-dark, #0b1220));
+  color: #fff;
+  font-size: 0.76rem;
+  font-weight: 950;
+}
+
+body .dayflow-maplibre-marker span {
+  max-width: 130px;
+  overflow: hidden;
+  font-size: 0.74rem;
+  font-weight: 900;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body .dayflow-maplibre-marker.base {
+  cursor: default;
+}
+
+body .dayflow-maplibre-marker.base b {
+  box-shadow: 0 0 0 4px var(--destination-accent-soft, rgba(0, 194, 168, 0.18));
+}
+
+body .dayflow-maplibre-marker.is-active {
+  z-index: 12;
+  border-color: var(--destination-accent, #00c2a8);
+  box-shadow:
+    0 24px 54px rgba(11, 18, 32, 0.28),
+    0 0 0 6px var(--destination-accent-soft, rgba(0, 194, 168, 0.18));
+}
+
+body .maplibregl-ctrl-group {
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 12px 28px rgba(11, 18, 32, 0.16);
+}
+
+body .maplibregl-ctrl-attrib {
+  font-size: 10px;
+}
