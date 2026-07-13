@@ -13,6 +13,10 @@ export function useStoredState(key, initialValue) {
   const [state, setState] = useState(() => readStoredState(key, initialValue));
 
   useEffect(() => {
+    setState(readStoredState(key, initialValue));
+  }, [key]);
+
+  useEffect(() => {
     try {
       localStorage.setItem(key, JSON.stringify(state));
     } catch {

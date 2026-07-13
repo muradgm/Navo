@@ -34,19 +34,28 @@ import {
 } from "lucide-react";
 import "./styles.css";
 import "./navo.css";
-import { defaultDestinationPack } from "./data/destinations/index.js";
+import "./destination-theme.css";
+import {
+  defaultDestinationId,
+  destinationIds,
+  destinationRegistry,
+  getDestinationPack,
+} from "./data/destinations/index.js";
 import { TodayDecisionWidget } from "./today-decision-widget.jsx";
 import { NavoDayFlowMap } from "./dayflow/NavoDayFlowMap.jsx";
 
 const CHF_TO_EUR = 1.04;
 const APP_NAME = "Navo";
-const BASE_LOCATION = defaultDestinationPack.baseLocation;
+const DESTINATION_STORAGE_KEY = "navo-active-destination-id";
 const eur = (chf) => Math.round(chf * CHF_TO_EUR);
 const maps = (q) =>
   `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+const baseOrigin = (baseLocation) =>
+  `${baseLocation.label}, ${baseLocation.address}`;
 const route = (
   q,
-  origin = `${BASE_LOCATION.label}, ${BASE_LOCATION.address}`,
+  baseLocation,
+  origin = baseOrigin(baseLocation),
 ) =>
   `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(q)}&travelmode=transit`;
 const tierLabel = { $: "€", $$: "€€", $$$: "€€€" };
@@ -181,9 +190,6 @@ const copy = {
   },
 };
 
-// Use the registry-backed destination pack at runtime.
-// The full Basel pack now lives in `apps/src/data/destinations/basel/index.js`.
-
 function fieldName(label) {
   return (
     String(label)
@@ -192,8 +198,6 @@ function fieldName(label) {
       .replace(/^-|-$/g, "") || "field"
   );
 }
-
-const routeMeta = defaultDestinationPack.routeMeta || {};
 
 const guestIntentOptions = {
   outdoor: { en: "Outdoor places", de: "Outdoor-Orte" },
@@ -205,8 +209,45 @@ const guestIntentOptions = {
   balanced: { en: "Balanced family day", de: "Ausgewogener Familientag" },
 };
 
-function preferenceMatch(activity, intent) {
-  const meta = metaFor(activity);
+function applyDestinationTheme(destination) {
+  if (typeof document === "undefined" || !destination) return;
+
+  const theme = destination.theme || {};
+  const heroImage = destination.heroImage || {};
+  const root = document.documentElement;
+
+  root.dataset.destination = destination.id;
+  root.style.setProperty("--destination-hero-image", `url("${heroImage.src || ""}")`);
+  root.style.setProperty("--destination-accent", theme.accent || "#0e7c86");
+  root.style.setProperty(
+    "--destination-accent-soft",
+    theme.accentSoft || "rgba(14, 124, 134, 0.16)",
+  );
+  root.style.setProperty(
+    "--destination-accent-strong",
+    theme.accentStrong || "#0f545a",
+  );
+  root.style.setProperty("--destination-dark", theme.dark || "#0d292d");
+  root.style.setProperty(
+    "--destination-page-glow",
+    theme.pageGlow || "rgba(14, 124, 134, 0.18)",
+  );
+  root.style.setProperty(
+    "--destination-surface-tint",
+    theme.surfaceTint || "rgba(255, 250, 242, 0.86)",
+  );
+  root.style.setProperty(
+    "--destination-hero-overlay-from",
+    theme.heroOverlayFrom || "rgba(7, 19, 28, 0.72)",
+  );
+  root.style.setProperty(
+    "--destination-hero-overlay-to",
+    theme.heroOverlayTo || "rgba(13, 41, 45, 0.36)",
+  );
+}
+
+function preferenceMatch(activity, intent, routeMeta) {
+  const meta = metaFor(activity, routeMeta);
   if (intent === "outdoor") return meta.outdoor;
   if (intent === "parks")
     return activity.type === "Park" || activity.type === "Lake/Water";
@@ -221,7 +262,7 @@ function preferenceMatch(activity, intent) {
 
 function buildPreferenceRecommendation(
   activities,
-  { intent, weather, energy, budget, lang },
+  { intent, weather, energy, budget, lang, routeMeta },
 ) {
   const weatherRisk =
     weather === "hot" || weather === "rainy" || weather === "cold";
@@ -229,9 +270,9 @@ function buildPreferenceRecommendation(
     weatherRisk && ["outdoor", "parks", "water"].includes(intent);
   const scored = activities
     .map((activity) => {
-      const meta = metaFor(activity);
+      const meta = metaFor(activity, routeMeta);
       let score = meta.family / 2;
-      const preferred = preferenceMatch(activity, intent);
+      const preferred = preferenceMatch(activity, intent, routeMeta);
       if (preferred) score += 24;
       if (activity.energy.includes(energy) || energy === "medium") score += 12;
       if (eur(activity.cost) <= budget / 2) score += 8;
@@ -310,7 +351,7 @@ const planVariantLabels = {
   },
 };
 
-function metaFor(a) {
+function metaFor(a, routeMeta = {}) {
   return (
     routeMeta[a.id] || {
       zone: 99,
@@ -324,9 +365,9 @@ function metaFor(a) {
   );
 }
 
-function routeUrlForStops(stops) {
-  const origin = `${BASE_LOCATION.label}, ${BASE_LOCATION.address}`;
-  if (!stops.length) return route(origin);
+function routeUrlForStops(stops, baseLocation) {
+  const origin = baseOrigin(baseLocation);
+  if (!stops.length) return route(origin, baseLocation);
   const destination =
     stops[stops.length - 1].mapQuery ||
     stops[stops.length - 1].en ||
@@ -345,10 +386,10 @@ function routeUrlForStops(stops) {
   return `https://www.google.com/maps/dir/?${params.toString()}`;
 }
 
-function estimateSegmentMinutes(from, to) {
+function estimateSegmentMinutes(from, to, routeMeta) {
   const fromMeta =
-    from?.id === "base" ? { zone: 2, minutes: 0 } : metaFor(from);
-  const toMeta = metaFor(to);
+    from?.id === "base" ? { zone: 2, minutes: 0 } : metaFor(from, routeMeta);
+  const toMeta = metaFor(to, routeMeta);
   const zoneDelta = Math.abs((toMeta.zone || 2) - (fromMeta.zone || 2));
   const activitySpread = Math.abs(
     (toMeta.route || toMeta.zone || 2) - (fromMeta.route || fromMeta.zone || 2),
@@ -367,11 +408,14 @@ function buildRouteAwarePlan(
     energy = "medium",
     budget = 120,
     lang = "en",
+    routeMeta = {},
+    baseLocation,
+    destinationName = "your destination",
   } = {},
 ) {
   const ordered = [...items].sort((a, b) => {
-    const ma = metaFor(a);
-    const mb = metaFor(b);
+    const ma = metaFor(a, routeMeta);
+    const mb = metaFor(b, routeMeta);
     if (variant === "family")
       return ma.calm - mb.calm || mb.family - ma.family || ma.zone - mb.zone;
     if (variant === "fast") return ma.minutes - mb.minutes || ma.zone - mb.zone;
@@ -383,7 +427,7 @@ function buildRouteAwarePlan(
 
   const cost = items.reduce((sum, a) => sum + a.cost, 0);
   const minutes =
-    ordered.reduce((sum, a) => sum + metaFor(a).minutes, 0) +
+    ordered.reduce((sum, a) => sum + metaFor(a, routeMeta).minutes, 0) +
     Math.max(0, ordered.length - 1) * 18;
   const variety = new Set(ordered.map((a) => a.type)).size;
   const weatherFit = ordered.filter(
@@ -396,7 +440,10 @@ function buildRouteAwarePlan(
     .slice(1)
     .reduce(
       (sum, a, idx) =>
-        sum + Math.abs(metaFor(a).zone - metaFor(ordered[idx]).zone),
+        sum +
+        Math.abs(
+          metaFor(a, routeMeta).zone - metaFor(ordered[idx], routeMeta).zone,
+        ),
       0,
     );
   const budgetPressure = budget ? Math.max(0, eur(cost) - budget) : 0;
@@ -424,8 +471,8 @@ function buildRouteAwarePlan(
   } else {
     reasons.push(
       lang === "en"
-        ? "Stops are ordered to reduce backtracking from your Basel base."
-        : "Stopps werden so geordnet, dass unnötiges Hin und Her ab der Basler Basis reduziert wird.",
+        ? `Stops are ordered to reduce backtracking from your ${destinationName} base.`
+        : `Stopps werden so geordnet, dass unnötiges Hin und Her ab der Basis in ${destinationName} reduziert wird.`,
     );
     reasons.push(
       lang === "en"
@@ -490,6 +537,7 @@ function buildRouteAwarePlan(
     transferMinutes: estimateSegmentMinutes(
       index === 0 ? { id: "base" } : ordered[index - 1],
       activity,
+      routeMeta,
     ),
   }));
 
@@ -502,12 +550,40 @@ function buildRouteAwarePlan(
     reasons,
     warnings,
     routeJumps,
-    mapUrl: routeUrlForStops(ordered),
+    mapUrl: routeUrlForStops(ordered, baseLocation),
   };
 }
 
+function DestinationSwitcher({ activeDestinationId, onChange }) {
+  return (
+    <div id="destination-switcher" className="destination-switcher">
+      <label htmlFor="destination-select">Destination</label>
+      <select
+        id="destination-select"
+        name="destination"
+        value={activeDestinationId}
+        onChange={(event) => onChange(event.target.value)}
+      >
+        {destinationIds.map((id) => (
+          <option key={id} value={id}>
+            {destinationRegistry[id].name}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 function App() {
-  const destination = defaultDestinationPack;
+  const [activeDestinationId, setActiveDestinationId] = useStoredState(
+    DESTINATION_STORAGE_KEY,
+    defaultDestinationId,
+  );
+  const destination = getDestinationPack(activeDestinationId);
+  const activeDestinationKey = destinationRegistry[activeDestinationId]
+    ? activeDestinationId
+    : defaultDestinationId;
+  const routeMeta = destination.routeMeta || {};
   const destinationCopy = destination.hero;
   const destinationFood = destination.foodStrategy;
   const storageKey = (name) => `navo-${destination.id}-${name}`;
@@ -553,6 +629,24 @@ function App() {
     "outdoor",
   );
   const [reflowNote, setReflowNote] = useState(null);
+
+  useEffect(() => {
+    applyDestinationTheme(destination);
+  }, [destination]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("destination") === destination.id) return;
+    params.set("destination", destination.id);
+    const query = params.toString();
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`,
+    );
+  }, [destination.id]);
+
   const activeWeatherLocation =
     destination.weatherLocations[weatherLocation] ||
     destination.weatherLocations[destination.primaryWeatherLocation];
@@ -604,8 +698,21 @@ function App() {
         energy,
         budget: todayBudget,
         lang,
+        routeMeta,
+        baseLocation: destination.baseLocation,
+        destinationName: destination.name,
       }),
-    [customActivities, planVariant, weather, energy, todayBudget, lang],
+    [
+      customActivities,
+      planVariant,
+      weather,
+      energy,
+      todayBudget,
+      lang,
+      routeMeta,
+      destination.baseLocation,
+      destination.name,
+    ],
   );
   const preferenceRecommendation = useMemo(
     () =>
@@ -615,8 +722,17 @@ function App() {
         energy,
         budget: todayBudget,
         lang,
+        routeMeta,
       }),
-    [destination.activities, guestIntent, weather, energy, todayBudget, lang],
+    [
+      destination.activities,
+      guestIntent,
+      weather,
+      energy,
+      todayBudget,
+      lang,
+      routeMeta,
+    ],
   );
 
   const toggleFav = (id) =>
@@ -677,6 +793,10 @@ function App() {
 
   return (
     <main>
+      <DestinationSwitcher
+        activeDestinationId={activeDestinationKey}
+        onChange={setActiveDestinationId}
+      />
       <section className="hero">
         <div className="topbar">
           <div className="brand-lockup">
@@ -924,6 +1044,8 @@ function App() {
               variant={planVariant}
               setVariant={setPlanVariant}
               plan={routeAwarePlan}
+              baseLocation={destination.baseLocation}
+              destinationName={destination.name}
               droppedIdeas={droppedIdeas}
               setDroppedIdeas={setDroppedIdeas}
               reflowNote={reflowNote}
@@ -1017,6 +1139,7 @@ function App() {
                 toggleFav={toggleFav}
                 addToDay={addToDay}
                 specialPlans={destination.specialPlans}
+                baseLocation={destination.baseLocation}
                 selectedDay={selectedDay}
                 inDay={(plan[selectedDay] || []).includes(a.id)}
               />
@@ -1495,6 +1618,8 @@ function RouteAwareDayPanel({
   variant,
   setVariant,
   plan,
+  baseLocation,
+  destinationName,
   droppedIdeas,
   setDroppedIdeas,
   reflowNote,
@@ -1584,7 +1709,8 @@ function RouteAwareDayPanel({
         plan={plan}
         variant={variant}
         variantLabel={labels[variant] || variant}
-        baseLocation={BASE_LOCATION}
+        baseLocation={baseLocation}
+        destinationName={destinationName}
       />
 
       <div className="variant-tabs" aria-label="Route variants">
@@ -1808,6 +1934,7 @@ function ActivityCard({
   toggleFav,
   addToDay,
   specialPlans,
+  baseLocation,
   selectedDay,
   inDay,
 }) {
@@ -1901,10 +2028,10 @@ function ActivityCard({
               <a href={a.official} target="_blank" rel="noreferrer">
                 <ExternalLink size={15} /> {c.official}
               </a>
-              <a href={a.map || route(title)} target="_blank" rel="noreferrer">
+              <a href={a.map || route(title, baseLocation)} target="_blank" rel="noreferrer">
                 <MapPin size={15} /> {c.map}
               </a>
-              <a href={route(title)} target="_blank" rel="noreferrer">
+              <a href={route(title, baseLocation)} target="_blank" rel="noreferrer">
                 <Navigation size={15} /> {c.route}
               </a>
               <a href={a.photos} target="_blank" rel="noreferrer">
