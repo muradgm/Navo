@@ -62,6 +62,15 @@ export const baselRouteMeta = {
     route: 4,
     calm: 1,
   },
+  tinguely: {
+    zone: 3,
+    minutes: 120,
+    family: 78,
+    indoor: true,
+    outdoor: false,
+    route: 3,
+    calm: 3,
+  },
   natural: {
     zone: 2,
     minutes: 120,
@@ -115,6 +124,15 @@ export const baselRouteMeta = {
     outdoor: true,
     route: 7,
     calm: 5,
+  },
+  dreilaendereck: {
+    zone: 5,
+    minutes: 110,
+    family: 74,
+    indoor: false,
+    outdoor: true,
+    route: 5,
+    calm: 4,
   },
   "naturbad-riehen": {
     zone: 4,
@@ -232,6 +250,15 @@ export const baselRouteMeta = {
     outdoor: true,
     route: 12,
     calm: 12,
+  },
+  vitra: {
+    zone: 10,
+    minutes: 210,
+    family: 70,
+    indoor: true,
+    outdoor: true,
+    route: 10,
+    calm: 8,
   },
 };
 

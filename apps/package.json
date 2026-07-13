@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "smoke:app": "node scripts/smoke-app.mjs",
+    "verify:destinations": "node scripts/verify-destination-packs.mjs",
     "verify:today-engine": "node scripts/verify-today-decision-engine.mjs",
     "verify:geo": "node scripts/verify-geo-points.mjs",
     "verify:dayflow-base": "node scripts/verify-dayflow-base-stop.mjs",
@@ -18,5 +20,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "vite": "^7.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1"
   }
 }
