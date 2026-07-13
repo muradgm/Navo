@@ -1,4 +1,5 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import { DayFlowMapLibreLayer } from "./DayFlowMapLibreLayer.jsx";
 import { dayFlowMapEngine } from "./mapEngine.js";
 import { buildDayFlowRouteStops } from "./routeStops.js";
 
@@ -52,48 +53,11 @@ function buildDayFlowGeometry(stops, baseLocation) {
     coordStops.length;
   return {
     points,
-    routePath: points
-      .map((point) => `${point.x.toFixed(1)},${point.y.toFixed(1)}`)
-      .join(" "),
     center: [centerLng, centerLat],
+    routeCoordinates: coordStops.map((stop) => stop.coordinates),
     zoom,
     viewWidth,
     viewHeight,
-  };
-}
-
-function tileListForCenter(center, zoom = 14) {
-  const point = lonLatToTilePoint(center, zoom);
-  const centerX = Math.floor(point.x / 256);
-  const centerY = Math.floor(point.y / 256);
-  const tiles = [];
-  const radius = 2;
-  const size = 100 / (radius * 2 + 1);
-  for (let y = -radius; y <= radius; y += 1) {
-    for (let x = -radius; x <= radius; x += 1) {
-      tiles.push({
-        key: `${centerX + x}-${centerY + y}`,
-        src: `https://tile.openstreetmap.org/${zoom}/${centerX + x}/${centerY + y}.png`,
-        left: `${radius * size + x * size}%`,
-        top: `${radius * size + y * size}%`,
-        size: `${size}%`,
-      });
-    }
-  }
-  return tiles;
-}
-
-function dayFlowMarkerOffset(point, markerPoints, dense) {
-  if (!dense || point.stop.id === "base") return {};
-  const closeToAnotherMarker = markerPoints.some((other) => {
-    if (other === point) return false;
-    return Math.hypot(point.x - other.x, point.y - other.y) < 68;
-  });
-  if (!closeToAnotherMarker) return {};
-  const angle = ((point.index || 1) * 137.5 * Math.PI) / 180;
-  return {
-    "--pin-dx": `${Math.round(Math.cos(angle) * 24)}px`,
-    "--pin-dy": `${Math.round(Math.sin(angle) * 24)}px`,
   };
 }
 
@@ -128,7 +92,6 @@ function formatCoordinates(coordinates) {
 
 export function NavoDayFlowMap({ lang, plan, variant, variantLabel, baseLocation }) {
   const geometry = buildDayFlowGeometry(plan.ordered || [], baseLocation);
-  const tiles = tileListForCenter(geometry.center, geometry.zoom + 1);
   const stopCount = Math.max(0, geometry.points.length - 2);
   const dense = stopCount > 4;
   const overloaded = stopCount > 7;
@@ -153,6 +116,7 @@ export function NavoDayFlowMap({ lang, plan, variant, variantLabel, baseLocation
       ].filter(Boolean).join(" · ")
     : "";
   const activeMapUrl = activeActivity ? mapSearchUrl(activeActivity) : "";
+  const activeSourceUrl = activeActivity?.sourceUrl || activeActivity?.official || "";
   const activeCoordinates = activeActivity
     ? formatCoordinates(activeActivity.coordinates)
     : "";
@@ -215,115 +179,20 @@ export function NavoDayFlowMap({ lang, plan, variant, variantLabel, baseLocation
         className={`dayflow-map-shell ${dense ? "dense" : ""} ${overloaded ? "overloaded" : ""}`}
         data-map-engine={dayFlowMapEngine.id}
         data-map-engine-status={dayFlowMapEngine.status}
-        role="img"
         aria-label={
           lang === "en"
             ? "Navo route map for Basel day plan"
             : "Navo Routenkarte für Basel-Tagesplan"
         }
       >
-        <div className="osm-tile-grid" aria-hidden="true">
-          {tiles.map((tile) => (
-            <img
-              key={tile.key}
-              src={tile.src}
-              style={{
-                left: tile.left,
-                top: tile.top,
-                width: tile.size,
-                height: tile.size,
-              }}
-              alt=""
-              loading="lazy"
-              decoding="async"
-            />
-          ))}
-        </div>
+        <DayFlowMapLibreLayer
+          geometry={geometry}
+          markerPoints={markerPoints}
+          lang={lang}
+          activeStopId={activeStopId}
+          onSelectStop={activateStop}
+        />
         <div className="dayflow-map-tint" aria-hidden="true" />
-        <svg
-          className="dayflow-route-svg"
-          viewBox={`0 0 ${geometry.viewWidth} ${geometry.viewHeight}`}
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          <defs>
-            <linearGradient
-              id="dayflowRouteGradient"
-              x1="0%"
-              y1="0%"
-              x2="100%"
-              y2="100%"
-            >
-              <stop offset="0%" stopColor="#00C2A8" />
-              <stop offset="58%" stopColor="#15AFC7" />
-              <stop offset="100%" stopColor="#13324A" />
-            </linearGradient>
-            <filter id="dayflowGlow">
-              <feGaussianBlur stdDeviation="5" result="coloredBlur" />
-              <feMerge>
-                <feMergeNode in="coloredBlur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
-          {geometry.points.length > 1 && (
-            <polyline
-              className="dayflow-route-shadow"
-              points={geometry.routePath}
-            />
-          )}
-          {geometry.points.length > 1 && (
-            <polyline
-              className="dayflow-route-line"
-              points={geometry.routePath}
-              filter="url(#dayflowGlow)"
-            />
-          )}
-          {geometry.points.length > 1 && (
-            <polyline
-              className={`dayflow-route-pulse ${variant === "rain" ? "rain" : ""}`}
-              points={geometry.routePath}
-            />
-          )}
-        </svg>
-
-        {markerPoints.map((point, i) => {
-          const isBase = point.stop.id === "base";
-          const number = isBase ? "B" : point.index;
-          const title = lang === "en" ? point.stop.en : point.stop.de;
-          const isActive = !isBase && activeStopId === point.stop.id;
-
-          return (
-            <div
-              key={`${point.stop.id}-${i}`}
-              className={`${isBase ? "dayflow-stop-marker base" : "dayflow-stop-marker"} ${dense ? "compact" : ""} ${isActive ? "is-active" : ""}`}
-              style={{
-                left: `${(point.x / geometry.viewWidth) * 100}%`,
-                top: `${(point.y / geometry.viewHeight) * 100}%`,
-                ...dayFlowMarkerOffset(point, markerPoints, dense),
-              }}
-              role="button"
-              tabIndex={0}
-              aria-current={isActive ? "step" : undefined}
-              aria-label={
-                isBase
-                  ? lang === "en"
-                    ? "Base stop"
-                    : "Basis-Stopp"
-                  : lang === "en"
-                    ? `Select stop ${number}: ${title}`
-                    : `Stopp ${number} auswählen: ${title}`
-              }
-              onMouseEnter={() => activateStop(point.stop)}
-              onFocus={() => activateStop(point.stop)}
-              onClick={() => activateStop(point.stop)}
-              onKeyDown={(event) => handleStopKeyDown(event, point.stop)}
-            >
-              <b>{number}</b>
-              <span>{title}</span>
-            </div>
-          );
-        })}
 
         {dense && <div className="dayflow-density-note">{densityNote}</div>}
 
@@ -384,8 +253,8 @@ export function NavoDayFlowMap({ lang, plan, variant, variantLabel, baseLocation
             <a href={activeMapUrl} target="_blank" rel="noreferrer">
               {lang === "en" ? "Open in Maps" : "In Maps öffnen"}
             </a>
-            {activeActivity.sourceUrl && (
-              <a href={activeActivity.sourceUrl} target="_blank" rel="noreferrer">
+            {activeSourceUrl && (
+              <a href={activeSourceUrl} target="_blank" rel="noreferrer">
                 {lang === "en" ? "Source" : "Quelle"}
               </a>
             )}
